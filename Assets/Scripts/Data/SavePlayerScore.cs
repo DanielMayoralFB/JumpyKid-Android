@@ -55,7 +55,7 @@ public class SavePlayerScore : MonoBehaviour
     #region Unity Methods
     private void Awake()
     {
-        path = Application.dataPath + Path.DirectorySeparatorChar + "Scores.json";
+        path = Application.persistentDataPath + Path.DirectorySeparatorChar + "Scores.json";
         if (FindObjectsOfType(GetType()).Length > 1)
         {
             Destroy(gameObject);

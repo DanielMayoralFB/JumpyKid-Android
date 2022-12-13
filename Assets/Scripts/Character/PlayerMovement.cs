@@ -17,6 +17,7 @@ public class PlayerMovement : MonoBehaviour
     [Header("Collider Filter")]
     [SerializeField] private BoxCollider2D myCollider;
     private ContactFilter2D filter;
+    [SerializeField] private Joystick joystick;
     #endregion
 
     #region UI Variables
@@ -25,7 +26,6 @@ public class PlayerMovement : MonoBehaviour
     private Text textoPuntos;
     private RawImage[] lifesUI = new RawImage[3];
     [SerializeField] private Sprite[] hearts = new Sprite[5];
-    [SerializeField] private GameObject pauseCanvas;
     #endregion
 
     #region Actions Variables
@@ -38,6 +38,8 @@ public class PlayerMovement : MonoBehaviour
     private bool canMove;
     private IEnumerator coroutineRespawn = null;
     private bool doubleJump;
+    private bool isJumping;
+    public bool isPressing;
     #endregion
 
     #endregion
@@ -56,13 +58,12 @@ public class PlayerMovement : MonoBehaviour
         lifesUI[1] = GameObject.FindGameObjectWithTag("Heart2").GetComponent<RawImage>();
         lifesUI[2] = GameObject.FindGameObjectWithTag("Heart3").GetComponent<RawImage>();
         textoPuntos = GameObject.FindGameObjectWithTag("PuntosUI").GetComponent<Text>();
-        pauseCanvas = GameObject.FindGameObjectWithTag("PauseCanvas");
         //textoVidas.text = "Vidas: " + GameManager.instance.getActualLife();
         textoPuntos.text = "Puntos: " + puntos;
 
-        gameManager = GameManager.FindObjectOfType<GameManager>();
+        gameManager = FindObjectOfType<GameManager>();
 
-        gamepad = new GamepadController();
+        joystick = FindObjectOfType<Joystick>();
 
         filter.minNormalAngle = 45;
         filter.maxNormalAngle = 135;
@@ -84,7 +85,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (myRB.velocity.y > 0)
         {
-            if (!Input.GetKey("space"))
+            if (!isPressing)
             {
                 myRB.velocity += Vector2.up * Physics2D.gravity.y * (lowJumpMultiplier) * Time.deltaTime;
             }
@@ -100,27 +101,7 @@ public class PlayerMovement : MonoBehaviour
             //textoVidas.text = "Vidas: " + GameManager.instance.getActualLife();
             updateLifesUI();
 
-            if (gameManager != null)
-            {
-                if (gameManager.getController() == ControllerType.Keyboard)
-                {
-                    controlesTeclado();
-                }
-                else if (gameManager.getController() == ControllerType.Gamepad)
-                {
-                    gamepad.Enable();
-
-                    gamepad.Gameplay.Jump.performed += ctx => saltar();
-                    gamepad.Gameplay.Bajar.performed += ctx => bajar();
-                    gamepad.Gameplay.Pausar.performed += ctx => pausa();
-                    gamepad.Gameplay.Pausar.canceled += ctx => animator.SetBool("Agachado", false);
-                    controlesMando();
-                }
-            }
-            else
-            {
-                controlesTeclado();
-            }
+            controlesJoystick();
 
 
         }
@@ -254,15 +235,15 @@ public class PlayerMovement : MonoBehaviour
     /// <summary>
     /// Function that have all logic of the keyboard's input.
     /// </summary>
-    void controlesTeclado()
+    void controlesJoystick()
     {
-        if (Input.GetKey("d"))
+        if (joystick.Horizontal > 0f)
         {
             myRB.velocity = new Vector2(speedMove, myRB.velocity.y);
             mySR.flipX = false;
             animator.SetBool("Walk", true);
         }
-        else if (Input.GetKey("a"))
+        else if (joystick.Horizontal < 0f)
         {
             myRB.velocity = new Vector2(-speedMove, myRB.velocity.y);
             mySR.flipX = true;
@@ -274,27 +255,6 @@ public class PlayerMovement : MonoBehaviour
                 myRB.velocity = new Vector2(0, myRB.velocity.y);
             //mySR.flipX = false;
             animator.SetBool("Walk", false);
-        }
-
-        if ((Input.GetKey("space")))
-        {
-            if (isGrounded)
-            {
-                myRB.velocity = new Vector2(myRB.velocity.x, speedJump);
-                doubleJump = true;
-            }
-            else
-            {
-                if (Input.GetKeyDown("space"))
-                {
-                    if (doubleJump)
-                    {
-                        animator.SetBool("DoubleJump", true);
-                        myRB.velocity = new Vector2(myRB.velocity.x, speedJump);
-                        doubleJump = false;
-                    }
-                }
-            }
         }
 
         if (!isGrounded)
@@ -326,94 +286,28 @@ public class PlayerMovement : MonoBehaviour
         {
             doubleJump = false;
         }
-
-        if (Input.GetButtonDown("Bajar"))
-        {
-            //animator.SetBool("Agachado", true);
-            animator.SetBool("Walk", false);
-        }
-        else
-        {
-            //animator.SetBool("Agachado", false);
-        }
-
-        if (Input.GetButtonDown("Pause"))
-        {
-            Debug.Log(pauseCanvas);
-            pauseCanvas.transform.GetChild(0).gameObject.SetActive(true);
-            Time.timeScale = 0;
-        }
     }
 
-    /// <summary>
-    /// Function that have all logic from controller's input
-    /// </summary>
-    void controlesMando()
+    public void jump()
     {
-
-        //movimiento del personaje
-        float velX = Input.GetAxisRaw("Horizontal");
-        if(velX > 0)
-        {
-            myRB.velocity = new Vector2(speedMove, myRB.velocity.y);
-            mySR.flipX = false;
-            animator.SetBool("Walk", true);
-        }else if(velX < 0)
-        {
-            myRB.velocity = new Vector2(-speedMove, myRB.velocity.y);
-            mySR.flipX = true;
-            animator.SetBool("Walk", true);
-        }
-        else
-        {
-            myRB.velocity = new Vector2(0, myRB.velocity.y);
-            //mySR.flipX = false;
-            animator.SetBool("Walk", false);
-        }
-    }
-
-    /// <summary>
-    /// Function that check if the player is in the ground.
-    /// If it is, apply a velocity in the y axis and start the animation of jump.
-    /// </summary>
-    void saltar()
-    {
-        //empiezan acciones del personaje
-        //control del salto
-        /*if (isGrounded)
+        if (isGrounded)
         {
             myRB.velocity = new Vector2(myRB.velocity.x, speedJump);
-            animator.SetBool("Jumping", false);
-            animator.SetBool("Fall", false);
+            doubleJump = true;
         }
-
-        if (!isGrounded)
+        else
         {
-            animator.SetBool("Jumping", true);
-            animator.SetBool("Walk", false);
-        }*/
-    }
-
-    //control poder bajar de una plataforma
-    void bajar()
-    {
-        animator.SetBool("Agachado", true);
-        animator.SetBool("Walk", false);
-    }
-
-    /// <summary>
-    /// Function that show the pause canvas and pause the game
-    /// </summary>
-    void pausa()
-    {
-        //control pausar juego
-        if (Input.GetButtonDown("Pause"))
-        {
-            Time.timeScale = 0;
-            pauseCanvas.SetActive(true);
+            if (doubleJump)
+            {
+                animator.SetBool("DoubleJump", true);
+                myRB.velocity = new Vector2(myRB.velocity.x, speedJump);
+                doubleJump = false;
+            }
+            
         }
     }
 
+    
     #endregion
 
     #region Other Methods

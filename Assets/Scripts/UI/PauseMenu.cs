@@ -19,6 +19,12 @@ public class PauseMenu : MonoBehaviour
         canvasPause.SetActive(false);
     }
 
+    public void pause()
+    {
+        Time.timeScale = 0;
+        canvasPause.SetActive(true);
+    }
+
     /// <summary>
     /// Go to Main Menu
     /// </summary>
