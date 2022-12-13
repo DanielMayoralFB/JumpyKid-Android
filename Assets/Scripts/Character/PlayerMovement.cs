@@ -38,6 +38,8 @@ public class PlayerMovement : MonoBehaviour
     private bool canMove;
     private IEnumerator coroutineRespawn = null;
     private bool doubleJump;
+    private bool isJumping;
+    public bool isPressing;
     #endregion
 
     #endregion
@@ -83,7 +85,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (myRB.velocity.y > 0)
         {
-            if (!Input.GetKey("space"))
+            if (!isPressing)
             {
                 myRB.velocity += Vector2.up * Physics2D.gravity.y * (lowJumpMultiplier) * Time.deltaTime;
             }
@@ -304,6 +306,8 @@ public class PlayerMovement : MonoBehaviour
             
         }
     }
+
+    
     #endregion
 
     #region Other Methods

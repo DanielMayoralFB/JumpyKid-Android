@@ -70,7 +70,7 @@ PlayerSettings:
   androidRenderOutsideSafeArea: 1
   androidUseSwappy: 1
   androidBlitType: 0
-  androidResizableWindow: 0
+  androidResizableWindow: 1
   androidDefaultWindowWidth: 1920
   androidDefaultWindowHeight: 1080
   androidMinimumWindowWidth: 400
@@ -136,7 +136,7 @@ PlayerSettings:
     16:10: 1
     16:9: 1
     Others: 1
-  bundleVersion: 0.1.3
+  bundleVersion: 0.1.4
   preloadedAssets:
   - {fileID: 11400000, guid: 00f950992a53c6145a6f7669006c8203, type: 2}
   metroInputSource: 0

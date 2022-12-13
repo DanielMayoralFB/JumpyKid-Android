@@ -6,6 +6,8 @@ public class JumpButton : MonoBehaviour
 {
 
     private PlayerMovement player;
+    private bool pressed;
+    private float pointerDownTimer;
 
     // Start is called before the first frame update
     void Start()
@@ -13,11 +15,24 @@ public class JumpButton : MonoBehaviour
         player = FindObjectOfType<PlayerMovement>();
     }
 
-    public void jumpPlayer()
+    private void Update()
     {
-        if(player != null) 
-        { 
-        player.jump();
+        if(pressed)
+        {
+            pointerDownTimer += Time.deltaTime;
         }
+    }
+
+    public void pointerUp()
+    {
+        pressed = false;
+        player.isPressing= false;
+    }
+
+    public void pointerDown()
+    {
+        pressed = true;
+        player.isPressing = true;
+        player.jump();
     }
 }
