@@ -20,7 +20,7 @@ public class CinematicController : MonoBehaviour
     private void Update()
     {
         if (directorControl.playableAsset.name.Equals(cinematicParts[1].name) &&
-            Input.GetKey("space"))
+            Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Ended)
         {
             
             directorControl.playableAsset = cinematicParts[2];
