@@ -82,12 +82,13 @@ public class SavePlayerScore : MonoBehaviour
     {
         if (!File.Exists(path))
         {
+            Debug.Log("Archivo creado");
             File.Create(path);
         }
-        File.OpenRead(path);
+        //File.OpenRead(path);
         string txt = File.ReadAllText(path);
-        JsonUtility.FromJsonOverwrite(txt, listScores.scoreList);
-
+        listScores = JsonUtility.FromJson<SerializableList<PlayerScore>>(txt);
+        Debug.Log(listScores.scoreList.Count);
     }
     #endregion
 
@@ -109,30 +110,34 @@ public class SavePlayerScore : MonoBehaviour
     /// <param name="playerData"></param>
     public void Save(PlayerScore playerData)
     {
-        if (listScores.scoreList.Count < 5)
+        if(playerData.playerName != "")
         {
-            listScores.scoreList.Add(playerData);
-        }
-        else
-        {
-            var lastScore = listScores.scoreList[listScores.scoreList.Count - 1];
-            if (lastScore.playerScore < playerData.playerScore)
+            if (listScores.scoreList.Count < 5)
             {
-                listScores.scoreList.RemoveAt(listScores.scoreList.Count - 1);
                 listScores.scoreList.Add(playerData);
-                
             }
             else
             {
-                Debug.Log("El nuevo score es menor que el anterior");
+                var lastScore = listScores.scoreList[listScores.scoreList.Count - 1];
+                if (lastScore.playerScore < playerData.playerScore)
+                {
+                    listScores.scoreList.RemoveAt(listScores.scoreList.Count - 1);
+                    listScores.scoreList.Add(playerData);
+
+                }
+                else
+                {
+                    Debug.Log("El nuevo score es menor que el anterior");
+                }
+
             }
 
+            listScores.scoreList = listScores.scoreList.OrderByDescending(x => x.playerScore).ToList();
+            string txt = JsonUtility.ToJson(listScores);
+            Debug.Log(JsonUtility.ToJson(listScores));
+            File.WriteAllText(path, txt);
         }
-
-        listScores.scoreList = listScores.scoreList.OrderByDescending(x => x.playerScore).ToList();
-        string txt = JsonUtility.ToJson(listScores);
-        Debug.Log(JsonUtility.ToJson(listScores));
-        File.WriteAllText(path, txt);
+        
         
     }
     #endregion
