@@ -11,14 +11,16 @@ using System.Linq;
 [System.Serializable]
 public class PlayerScore
 {
-    public PlayerScore(string playerName, int playerPoints)
+    public PlayerScore(string playerName, int playerPoints, string fecha)
     {
         this.playerName = playerName;
         this.playerScore = playerPoints;
+        this.fecha = fecha;
     }
 
     public string playerName;
     public int playerScore;
+    public string fecha;
 }
 
 /// <summary>
@@ -88,6 +90,20 @@ public class SavePlayerScore : MonoBehaviour
         //File.OpenRead(path);
         string txt = File.ReadAllText(path);
         listScores = JsonUtility.FromJson<SerializableList<PlayerScore>>(txt);
+
+        List<PlayerScore> datosBorrar = new List<PlayerScore>();
+        foreach(var data in listScores.scoreList)
+        {
+            if (data.playerName.Equals(""))
+            {
+                datosBorrar.Add(data);
+            }
+        }
+
+        foreach(var datos in datosBorrar) 
+        {
+            listScores.scoreList.Remove(datos);
+        }
         Debug.Log(listScores.scoreList.Count);
     }
     #endregion
@@ -114,6 +130,7 @@ public class SavePlayerScore : MonoBehaviour
         {
             if (listScores.scoreList.Count < 5)
             {
+
                 listScores.scoreList.Add(playerData);
             }
             else

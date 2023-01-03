@@ -17,7 +17,7 @@ public class ScoreList : MonoBehaviour
     {
         foreach(PlayerScore score in SavePlayerScore.instance.getListaScores())
         {
-            lista.text += score.playerName + ": " + score.playerScore + "\n";
+            lista.text += score.playerName + ": " + score.playerScore + " (" + score.fecha+")\n";
         }
     }
     #endregion

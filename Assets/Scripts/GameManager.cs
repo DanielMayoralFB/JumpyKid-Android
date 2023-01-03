@@ -283,7 +283,7 @@ public class GameManager : MonoBehaviour
     public void resetVariables()
     {
         //Guardamos la información del Score antes de resetear las variables
-        var playerData = new PlayerScore(playerName,playerPoints);
+        var playerData = new PlayerScore(playerName,playerPoints, System.DateTime.Now.ToString("dd/MM/yyyy"));
         SavePlayerScore.instance.Save(playerData);
 
         playerChoice = 0;
